@@ -294,7 +294,50 @@ const HOUSE_LABELS = {
 };
 
 // Country list for picker
-// Country list removed — location is now a single free-text field
+// Country name → ISO code lookup (API requires 2-letter codes)
+const COUNTRY_CODES = {
+  'us': 'US', 'usa': 'US', 'united states': 'US', 'america': 'US',
+  'uk': 'GB', 'united kingdom': 'GB', 'england': 'GB', 'britain': 'GB', 'great britain': 'GB', 'scotland': 'GB', 'wales': 'GB',
+  'canada': 'CA', 'australia': 'AU', 'india': 'IN', 'germany': 'DE', 'deutschland': 'DE',
+  'france': 'FR', 'brazil': 'BR', 'brasil': 'BR', 'mexico': 'MX', 'méxico': 'MX',
+  'italy': 'IT', 'italia': 'IT', 'spain': 'ES', 'españa': 'ES', 'netherlands': 'NL', 'holland': 'NL',
+  'japan': 'JP', 'south korea': 'KR', 'korea': 'KR', 'china': 'CN', 'russia': 'RU',
+  'south africa': 'ZA', 'nigeria': 'NG', 'philippines': 'PH', 'colombia': 'CO',
+  'argentina': 'AR', 'sweden': 'SE', 'norway': 'NO', 'denmark': 'DK',
+  'ireland': 'IE', 'new zealand': 'NZ', 'portugal': 'PT', 'israel': 'IL',
+  'uae': 'AE', 'united arab emirates': 'AE', 'singapore': 'SG', 'thailand': 'TH',
+  'indonesia': 'ID', 'malaysia': 'MY', 'vietnam': 'VN', 'pakistan': 'PK',
+  'bangladesh': 'BD', 'sri lanka': 'LK', 'nepal': 'NP', 'turkey': 'TR', 'türkiye': 'TR',
+  'greece': 'GR', 'poland': 'PL', 'czech republic': 'CZ', 'czechia': 'CZ',
+  'austria': 'AT', 'switzerland': 'CH', 'belgium': 'BE', 'finland': 'FI',
+  'romania': 'RO', 'hungary': 'HU', 'ukraine': 'UA', 'egypt': 'EG',
+  'morocco': 'MA', 'kenya': 'KE', 'ghana': 'GH', 'ethiopia': 'ET',
+  'tanzania': 'TZ', 'uganda': 'UG', 'chile': 'CL', 'peru': 'PE',
+  'venezuela': 'VE', 'ecuador': 'EC', 'cuba': 'CU', 'jamaica': 'JM',
+  'puerto rico': 'PR', 'dominican republic': 'DO', 'costa rica': 'CR',
+  'panama': 'PA', 'guatemala': 'GT', 'honduras': 'HN', 'el salvador': 'SV',
+  'nicaragua': 'NI', 'bolivia': 'BO', 'paraguay': 'PY', 'uruguay': 'UY',
+  'trinidad': 'TT', 'trinidad and tobago': 'TT', 'bahamas': 'BS',
+  'iraq': 'IQ', 'iran': 'IR', 'saudi arabia': 'SA', 'qatar': 'QA',
+  'kuwait': 'KW', 'jordan': 'JO', 'lebanon': 'LB', 'syria': 'SY',
+  'afghanistan': 'AF', 'myanmar': 'MM', 'cambodia': 'KH', 'laos': 'LA',
+  'taiwan': 'TW', 'hong kong': 'HK', 'macau': 'MO', 'mongolia': 'MN',
+  'scotland': 'GB', 'northern ireland': 'GB',
+};
+function resolveCountryCode(input) {
+  if (!input) return 'US';
+  const trimmed = input.trim();
+  // Already a 2-letter code
+  if (trimmed.length === 2 && trimmed === trimmed.toUpperCase()) return trimmed;
+  const lower = trimmed.toLowerCase();
+  if (COUNTRY_CODES[lower]) return COUNTRY_CODES[lower];
+  // Fuzzy: check if input starts with any known country
+  for (const [name, code] of Object.entries(COUNTRY_CODES)) {
+    if (lower.startsWith(name) || name.startsWith(lower)) return code;
+  }
+  // Last resort — return as-is and hope the API can handle it
+  return trimmed;
+}
 
 function apiDataToPlanets(chartData) {
   if (!chartData || !chartData.tropical) return null;
@@ -792,8 +835,8 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
     const loc = location.trim() || 'New York';
     const parts = loc.split(',').map(s => s.trim());
     const cityName = parts[0];
-    const countryName = parts.length > 1 ? parts[parts.length - 1] : 'US';
-    onSaveBirthData({ name: 'User', year: parseInt(year) || 2000, month: parseInt(month) || 1, day: parseInt(day) || 1, hour: h, minute: m, city: cityName, country: countryName });
+    const countryCode = resolveCountryCode(parts.length > 1 ? parts[parts.length - 1] : 'US');
+    onSaveBirthData({ name: 'User', year: parseInt(year) || 2000, month: parseInt(month) || 1, day: parseInt(day) || 1, hour: h, minute: m, city: cityName, country: countryCode });
     onNavigate('compiling');
   };
 
