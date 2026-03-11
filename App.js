@@ -149,6 +149,14 @@ function IconCelestialDot({ size = 8, color = '#D4A574' }) {
 }
 
 // ═══════════════════════════════════════════════
+// FADE-IN IMAGE — smoother perceived loading
+// ═══════════════════════════════════════════════
+function FadeImage({ style, ...props }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  return <Animated.Image {...props} style={[style, { opacity }]} onLoad={() => Animated.timing(opacity, { toValue: style?.opacity ?? 1, duration: 300, useNativeDriver: true }).start()} />;
+}
+
+// ═══════════════════════════════════════════════
 // GENERATED CELESTIAL ART
 // ═══════════════════════════════════════════════
 const IMG = {
@@ -286,23 +294,7 @@ const HOUSE_LABELS = {
 };
 
 // Country list for picker
-const COUNTRIES = [
-  { code: 'US', name: 'United States' }, { code: 'GB', name: 'United Kingdom' },
-  { code: 'CA', name: 'Canada' }, { code: 'AU', name: 'Australia' },
-  { code: 'IN', name: 'India' }, { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' }, { code: 'BR', name: 'Brazil' },
-  { code: 'MX', name: 'Mexico' }, { code: 'IT', name: 'Italy' },
-  { code: 'ES', name: 'Spain' }, { code: 'NL', name: 'Netherlands' },
-  { code: 'JP', name: 'Japan' }, { code: 'KR', name: 'South Korea' },
-  { code: 'CN', name: 'China' }, { code: 'RU', name: 'Russia' },
-  { code: 'ZA', name: 'South Africa' }, { code: 'NG', name: 'Nigeria' },
-  { code: 'PH', name: 'Philippines' }, { code: 'CO', name: 'Colombia' },
-  { code: 'AR', name: 'Argentina' }, { code: 'SE', name: 'Sweden' },
-  { code: 'NO', name: 'Norway' }, { code: 'DK', name: 'Denmark' },
-  { code: 'IE', name: 'Ireland' }, { code: 'NZ', name: 'New Zealand' },
-  { code: 'PT', name: 'Portugal' }, { code: 'IL', name: 'Israel' },
-  { code: 'AE', name: 'UAE' }, { code: 'SG', name: 'Singapore' },
-];
+// Country list removed — location is now a single free-text field
 
 function apiDataToPlanets(chartData) {
   if (!chartData || !chartData.tropical) return null;
@@ -384,7 +376,7 @@ function GlowOrb({ size = 200, color = C.glow, top, left, right, bottom }) {
 }
 
 function CelestialDivider({ style }) {
-  return <View style={[{ alignItems: 'center', marginVertical: 20 }, style]}><Image source={IMG.celestialBanner} style={{ width: SW - 48, height: (SW - 48) * 0.35, opacity: 0.3 }} resizeMode="contain" /></View>;
+  return <View style={[{ alignItems: 'center', marginVertical: 20 }, style]}><FadeImage source={IMG.celestialBanner} style={{ width: SW - 48, height: (SW - 48) * 0.35, opacity: 0.3 }} resizeMode="contain" /></View>;
 }
 
 function OrnateFrame({ children, style }) {
@@ -456,8 +448,8 @@ function ConstellationChart({ planets, view }) {
   return (
     <View style={{ alignItems: 'center', marginVertical: 4 }}>
       {/* Background celestial art — more prominent */}
-      <Image source={IMG.chartHero} style={{ position: 'absolute', width: chartSize * 0.65, height: chartSize * 0.65, opacity: 0.18, top: chartSize * 0.18, borderRadius: chartSize * 0.33 }} resizeMode="cover" />
-      <Image source={IMG.zodiacWheel} style={{ position: 'absolute', width: chartSize * 0.4, height: chartSize * 0.4, opacity: 0.06, top: chartSize * 0.3 }} resizeMode="contain" />
+      <FadeImage source={IMG.chartHero} style={{ position: 'absolute', width: chartSize * 0.65, height: chartSize * 0.65, opacity: 0.18, top: chartSize * 0.18, borderRadius: chartSize * 0.33 }} resizeMode="cover" />
+      <FadeImage source={IMG.zodiacWheel} style={{ position: 'absolute', width: chartSize * 0.4, height: chartSize * 0.4, opacity: 0.06, top: chartSize * 0.3 }} resizeMode="contain" />
 
       <View style={{ width: chartSize, height: chartSize }}>
         <Svg width={chartSize} height={chartSize}>
@@ -785,7 +777,7 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
   const [step, setStep] = useState(1);
   const [month, setMonth] = useState(''); const [day, setDay] = useState(''); const [year, setYear] = useState('');
   const [hour, setHour] = useState(''); const [minute, setMinute] = useState(''); const [ampm, setAmpm] = useState('AM');
-  const [city, setCity] = useState(''); const [country, setCountry] = useState('US');
+  const [location, setLocation] = useState('');
   const dayRef = useRef(null); const yearRef = useRef(null); const minRef = useRef(null);
 
   const handleMonth = (v) => { setMonth(v); if (v.length === 2) dayRef.current?.focus(); };
@@ -797,7 +789,11 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
   const handleSubmit = () => {
     let h = parseInt(hour) || 12; const m = parseInt(minute) || 0;
     if (ampm === 'PM' && h !== 12) h += 12; if (ampm === 'AM' && h === 12) h = 0;
-    onSaveBirthData({ name: 'User', year: parseInt(year) || 2000, month: parseInt(month) || 1, day: parseInt(day) || 1, hour: h, minute: m, city: city.trim() || 'New York', country: country || 'US' });
+    const loc = location.trim() || 'New York';
+    const parts = loc.split(',').map(s => s.trim());
+    const cityName = parts[0];
+    const countryName = parts.length > 1 ? parts[parts.length - 1] : 'US';
+    onSaveBirthData({ name: 'User', year: parseInt(year) || 2000, month: parseInt(month) || 1, day: parseInt(day) || 1, hour: h, minute: m, city: cityName, country: countryName });
     onNavigate('compiling');
   };
 
@@ -806,7 +802,7 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
 
   return (
     <ScrollView style={st.screen} contentContainerStyle={{ paddingHorizontal: 28, paddingTop: 80 }}>
-      <Image source={IMG.onboardingGateway} style={{ position: 'absolute', top: -40, left: 0, width: SW, height: SW * 1.4, opacity: 0.1 }} resizeMode="cover" />
+      <FadeImage source={IMG.onboardingGateway} style={{ position: 'absolute', top: -40, left: 0, width: SW, height: SW * 1.4, opacity: 0.1 }} resizeMode="cover" />
       <StarField />
       <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
         {[1, 2, 3].map(n => <View key={n} style={[{ width: n === step ? 28 : 10, height: 4, borderRadius: 2, backgroundColor: C.muted }, n === step && { backgroundColor: C.gold }, n < step && { backgroundColor: C.sage }]} />)}
@@ -835,18 +831,9 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
       )}
       {step === 3 && (
         <>
-          <Text style={st.label}>CITY</Text>
-          <TextInput style={st.input} placeholder="e.g. Los Angeles" placeholderTextColor={C.muted} value={city} onChangeText={setCity} />
-          <Text style={st.label}>COUNTRY</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 4 }}>
-            <View style={{ flexDirection: 'row', gap: 8, paddingBottom: 8 }}>
-              {COUNTRIES.map(c => (
-                <TouchableOpacity key={c.code} onPress={() => setCountry(c.code)} style={[{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: C.border, backgroundColor: C.bgCard }, country === c.code && { backgroundColor: C.gold, borderColor: C.gold }]}>
-                  <Text style={[{ color: C.creamDim, fontSize: 12, fontFamily: F.bodyMed }, country === c.code && { color: C.bg }]}>{c.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
+          <Text style={st.label}>BIRTH LOCATION</Text>
+          <TextInput style={st.input} placeholder="e.g. Los Angeles, USA" placeholderTextColor={C.muted} value={location} onChangeText={setLocation} autoCapitalize="words" />
+          <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 6, opacity: 0.7 }}>City, Country — or just the city name</Text>
         </>
       )}
 
@@ -875,7 +862,7 @@ function CompilingScreen({ onNavigate, birthData, onChartReady }) {
 
   return (
     <View style={[st.screen, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
-      <Image source={IMG.zodiacWheel} style={{ position: 'absolute', width: SW * 0.9, height: SW * 0.9, opacity: 0.06 }} resizeMode="contain" />
+      <FadeImage source={IMG.zodiacWheel} style={{ position: 'absolute', width: SW * 0.9, height: SW * 0.9, opacity: 0.06 }} resizeMode="contain" />
       <StarField />
       <GlowOrb size={350} color="rgba(212,165,116,0.06)" top={SH * 0.25} left={SW / 2 - 175} />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 32 }}><IconStarDiamond size={12} color={C.gold} /><IconMoon size={16} color={C.gold} /><IconStarDiamond size={12} color={C.gold} /></View>
@@ -924,7 +911,7 @@ function DailyReadingScreen({ planets }) {
 
       {/* Personalized sun sign constellation image */}
       <View style={{ alignItems: 'center', marginBottom: 16 }}>
-        <Image source={signImage} style={{ width: SW - 80, height: SW - 80, borderRadius: 20, opacity: 0.85 }} resizeMode="cover" />
+        <FadeImage source={signImage} style={{ width: SW - 80, height: SW - 80, borderRadius: 20, opacity: 0.85 }} resizeMode="cover" />
         <View style={{ position: 'absolute', bottom: 12, left: 24, right: 24, backgroundColor: 'rgba(10,14,23,0.75)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 }}>
           <Text style={{ color: C.gold, fontSize: 13, fontFamily: F.bodySemi }}>
             {view === 'Your Whole Story' ? `${tropicalSign} · ${siderealSign}` : `Sun in ${displaySign}`}
@@ -947,7 +934,7 @@ function DailyReadingScreen({ planets }) {
 
       {/* Moon Forecast */}
       <GlassCard style={{ marginBottom: 20, overflow: 'hidden' }}>
-        <Image source={IMG.moonPhases} style={{ position: 'absolute', top: -20, right: -40, width: 200, height: 110, opacity: 0.15 }} resizeMode="cover" />
+        <FadeImage source={IMG.moonPhases} style={{ position: 'absolute', top: -20, right: -40, width: 200, height: 110, opacity: 0.15 }} resizeMode="cover" />
         <Text style={{ fontSize: 18, color: C.cream, fontFamily: F.displayMed, marginBottom: 4 }}>Moon Forecast</Text>
         <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginBottom: 10 }}>Current lunar energy</Text>
         <Text style={{ color: C.creamDim, fontSize: 14, lineHeight: 22, fontFamily: F.body }}>
@@ -1009,7 +996,7 @@ function ChartScreen({ planets }) {
         <ConstellationChart planets={displayPlanets} view={view} />
       ) : (
         <View>
-          <Image source={IMG.chartHero} style={{ width: SW - 64, height: SW - 64, opacity: 0.25, alignSelf: 'center', marginBottom: 16, borderRadius: 20 }} resizeMode="contain" />
+          <FadeImage source={IMG.chartHero} style={{ width: SW - 64, height: SW - 64, opacity: 0.25, alignSelf: 'center', marginBottom: 16, borderRadius: 20 }} resizeMode="contain" />
           <OrnateFrame style={{ marginBottom: 16 }}><Text style={{ color: C.cream, fontSize: 15, lineHeight: 26, fontFamily: F.body }}>Your Whole Story combines both charts — what the world sees on The Surface and what's really running on The Depths. Together, they reveal the complete code of who you are.</Text></OrnateFrame>
         </View>
       )}
@@ -1411,7 +1398,7 @@ function CoursesScreen() {
       <StarField />
 
       {/* Learn hero image */}
-      <Image source={IMG.learnHero} style={{ width: SW - 48, height: (SW - 48) * 0.65, borderRadius: 20, alignSelf: 'center', marginTop: 50, marginBottom: 16, opacity: 0.7 }} resizeMode="cover" />
+      <FadeImage source={IMG.learnHero} style={{ width: SW - 48, height: (SW - 48) * 0.65, borderRadius: 20, alignSelf: 'center', marginTop: 50, marginBottom: 16, opacity: 0.7 }} resizeMode="cover" />
 
       <Text style={{ color: C.gold, fontSize: 12, letterSpacing: 3, fontFamily: F.bodySemi, textTransform: 'uppercase', marginBottom: 6 }}>Learn</Text>
       <Text style={{ fontSize: 32, color: C.cream, fontFamily: F.display, lineHeight: 38, marginBottom: 4 }}>Cosmic Library</Text>
@@ -1494,7 +1481,7 @@ function ProfileScreen({ onNavigate, birthData }) {
 
   const dd = birthData ? new Date(birthData.year, birthData.month - 1, birthData.day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not set';
   const dt = birthData ? `${birthData.hour > 12 ? birthData.hour - 12 : birthData.hour || 12}:${String(birthData.minute).padStart(2, '0')} ${birthData.hour >= 12 ? 'PM' : 'AM'}` : 'Not set';
-  const dp = birthData ? `${birthData.city}, ${birthData.country}` : 'Not set';
+  const dp = birthData ? `${birthData.city}${birthData.country && birthData.country !== birthData.city ? ', ' + birthData.country : ''}` : 'Not set';
 
   // ─── NOTIFICATIONS SETTINGS ───
   if (settingsView === 'notifications') {
@@ -1578,7 +1565,7 @@ function ProfileScreen({ onNavigate, birthData }) {
             <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.bodyMed }}>{'<'} Back</Text>
           </TouchableOpacity>
           <View style={{ alignItems: 'center', marginBottom: 32 }}>
-            <Image source={IMG.profileHero} style={{ width: 80, height: 80, borderRadius: 40, marginBottom: 14, opacity: 0.8 }} resizeMode="cover" />
+            <FadeImage source={IMG.profileHero} style={{ width: 80, height: 80, borderRadius: 40, marginBottom: 14, opacity: 0.8 }} resizeMode="cover" />
             <Text style={{ fontSize: 32, color: C.cream, fontFamily: F.display, marginBottom: 4 }}>FAIRY CODE</Text>
             <Text style={{ color: C.gold, fontSize: 14, fontFamily: F.displayItalic, marginBottom: 2 }}>Your stars wrote a story.</Text>
             <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body }}>Version 1.0.0</Text>
@@ -1684,7 +1671,7 @@ function ProfileScreen({ onNavigate, birthData }) {
 
       {/* Profile hero image */}
       <View style={{ alignItems: 'center', marginTop: 50 }}>
-        <Image source={IMG.profileHero} style={{ width: 120, height: 120, borderRadius: 60, marginBottom: 14, opacity: 0.8 }} resizeMode="cover" />
+        <FadeImage source={IMG.profileHero} style={{ width: 120, height: 120, borderRadius: 60, marginBottom: 14, opacity: 0.8 }} resizeMode="cover" />
         <Text style={{ color: C.cream, fontSize: 22, fontFamily: F.display }}>FAIRY CODE</Text>
         <Text style={{ color: C.muted, fontSize: 13, fontFamily: F.body, marginTop: 4, marginBottom: 24 }}>7-day free trial</Text>
       </View>
