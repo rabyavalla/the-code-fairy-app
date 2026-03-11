@@ -396,11 +396,13 @@ function apiDataToPlanets(chartData) {
   }).filter(Boolean);
 }
 
-function apiTransitsToDisplay(data) {
-  if (!data || !data.tropical) return null;
+function apiTransitsToDisplay(data, system) {
+  if (!data) return null;
+  const src = system === 'sidereal' ? (data.sidereal || data.tropical) : data.tropical;
+  if (!src) return null;
   const order = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto'];
   return order.map(key => {
-    const t = data.tropical[key];
+    const t = src[key];
     if (!t) return null;
     return {
       key, planet: PLANET_NAMES[key], sign: t.sign, degree: Math.round(t.degree),
@@ -680,19 +682,45 @@ const FALLBACK_PLANETS = ['sun','moon','ascendant','mercury','venus','mars','jup
 }));
 
 // Generate dynamic daily reading from live transits
-function getDailyReading(transits, view) {
-  if (!transits || transits.length === 0) return 'The stars are aligning for you today. Pull down to refresh and see what the cosmos has to say.';
+function getDailyReading(rawData, view) {
+  if (!rawData) return 'The stars are aligning for you today. Pull down to refresh and see what the cosmos has to say.';
+  const system = view === 'The Depths' ? 'sidereal' : 'tropical';
+  const transits = apiTransitsToDisplay(rawData, system);
+  if (!transits || transits.length === 0) return 'The stars are aligning for you today. Pull down to refresh.';
   const sun = transits.find(t => t.key === 'sun');
   const moon = transits.find(t => t.key === 'moon');
   const mercury = transits.find(t => t.key === 'mercury');
   const venus = transits.find(t => t.key === 'venus');
   const mars = transits.find(t => t.key === 'mars');
   const parts = [];
-  if (sun) parts.push(`The Sun is moving through ${sun.sign}, lighting up themes of ${sun.element?.toLowerCase() || 'cosmic'} energy in the collective.`);
-  if (moon) parts.push(`The Moon is in ${moon.sign} today — ${moon.element === 'Fire' ? 'emotions run hot and action-oriented' : moon.element === 'Water' ? 'feelings run deep and intuition is strong' : moon.element === 'Air' ? 'the mood is social and mentally active' : 'the energy is grounded and steady'}.`);
-  if (mercury) parts.push(`Mercury in ${mercury.sign} shapes how we think and communicate right now${mercury.retrograde ? ' — and yes, Mercury is retrograde, so double-check everything' : ''}.`);
-  if (venus) parts.push(`Venus in ${venus.sign} colors what we desire and how we connect.`);
-  if (mars) parts.push(`Mars in ${mars.sign} drives the collective energy and ambition${mars.retrograde ? ' (retrograde — old frustrations may resurface)' : ''}.`);
+  if (view === 'The Surface') {
+    parts.push('The Surface reads the tropical sky — the seasonal zodiac that shapes how the world experiences you.');
+    if (sun) parts.push(`The Sun is moving through ${sun.sign}, lighting up themes of ${sun.element?.toLowerCase() || 'cosmic'} energy. This is the collective mood everyone feels.`);
+    if (moon) parts.push(`The Moon is in ${moon.sign} today — ${moon.element === 'Fire' ? 'emotions run hot and action-oriented' : moon.element === 'Water' ? 'feelings run deep and intuition peaks' : moon.element === 'Air' ? 'the mood is social and mentally buzzing' : 'the energy is grounded and steady'}.`);
+    if (mercury) parts.push(`Mercury in ${mercury.sign} colors how we communicate${mercury.retrograde ? ' — retrograde means double-check everything you send' : ''}.`);
+  } else if (view === 'The Depths') {
+    parts.push('The Depths reads the sidereal sky — the actual star positions that reveal your deeper, karmic patterns.');
+    if (sun) parts.push(`The sidereal Sun sits in ${sun.sign}, activating a different layer of your identity than the tropical chart shows.`);
+    if (moon) parts.push(`The sidereal Moon in ${moon.sign} reveals the emotional undercurrent most people can\'t see — this is the real feeling beneath the surface.`);
+    if (mars) parts.push(`Mars in ${mars.sign} drives your deeper ambitions and primal energy${mars.retrograde ? ' — retrograde asks you to rethink old battles' : ''}.`);
+  } else {
+    parts.push('Your Whole Story weaves both perspectives into one truth.');
+    const tropT = apiTransitsToDisplay(rawData, 'tropical');
+    const sidT = apiTransitsToDisplay(rawData, 'sidereal');
+    const tropSun = tropT?.find(t => t.key === 'sun');
+    const sidSun = sidT?.find(t => t.key === 'sun');
+    if (tropSun && sidSun && tropSun.sign !== sidSun.sign) {
+      parts.push(`On The Surface, the Sun in ${tropSun.sign} gives the world ${tropSun.element?.toLowerCase()} energy. But in The Depths, the sidereal Sun sits in ${sidSun.sign}, running a completely different code underneath.`);
+    } else if (tropSun) {
+      parts.push(`The Sun is in ${tropSun.sign} in both charts — surface and depths are aligned today, amplifying ${tropSun.element?.toLowerCase()} energy across all layers.`);
+    }
+    const tropMoon = tropT?.find(t => t.key === 'moon');
+    const sidMoon = sidT?.find(t => t.key === 'moon');
+    if (tropMoon && sidMoon && tropMoon.sign !== sidMoon.sign) {
+      parts.push(`The emotional story splits: the tropical Moon in ${tropMoon.sign} shapes the surface mood, while the sidereal Moon in ${sidMoon.sign} stirs something deeper.`);
+    }
+    if (venus) parts.push(`Venus in ${venus.sign} colors both layers of desire and connection today.`);
+  }
   return parts.join(' ');
 }
 
@@ -990,9 +1018,11 @@ function PulsingDot({ delay }) {
 function DailyReadingScreen({ planets }) {
   const [view, setView] = useState('The Surface');
   const [refreshing, setRefreshing] = useState(false);
-  const [liveTransits, setLiveTransits] = useState(null);
+  const [rawTransitData, setRawTransitData] = useState(null);
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const reading = getDailyReading(liveTransits, view);
+  const reading = getDailyReading(rawTransitData, view);
+  const system = view === 'The Depths' ? 'sidereal' : 'tropical';
+  const liveTransits = rawTransitData ? apiTransitsToDisplay(rawTransitData, system) : null;
 
   // Get user's sun sign for personalized imagery
   const sunPlanet = planets ? planets.find(p => p.key === 'sun') : null;
@@ -1001,18 +1031,14 @@ function DailyReadingScreen({ planets }) {
   const displaySign = view === 'The Surface' ? tropicalSign : view === 'The Depths' ? siderealSign : tropicalSign;
   const signImage = SIGN_IMAGES[displaySign] || SIGN_IMAGES.Leo;
 
-  const [lastFetchDate, setLastFetchDate] = useState('');
   useEffect(() => {
-    const today = new Date().toDateString();
-    const doFetch = () => {
-      fetchTransits().then(d => { if (d) { const p = apiTransitsToDisplay(d); if (p) setLiveTransits(p); } setLastFetchDate(today); });
-    };
+    const todayStr = new Date().toDateString();
+    const doFetch = () => { fetchTransits().then(d => { if (d) setRawTransitData(d); }); };
     doFetch();
-    // Check every 5 minutes if the day has changed
-    const interval = setInterval(() => { const now = new Date().toDateString(); if (now !== today) doFetch(); }, 5 * 60 * 1000);
+    const interval = setInterval(() => { const now = new Date().toDateString(); if (now !== todayStr) doFetch(); }, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
-  const handleRefresh = async () => { setRefreshing(true); const d = await fetchTransits(); if (d) { const p = apiTransitsToDisplay(d); if (p) setLiveTransits(p); } setRefreshing(false); };
+  const handleRefresh = async () => { setRefreshing(true); const d = await fetchTransits(); if (d) setRawTransitData(d); setRefreshing(false); };
 
   return (
     <ScrollView style={st.screen} contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
@@ -1692,6 +1718,19 @@ function ProfileScreen({ onNavigate, birthData }) {
             <Text style={{ color: C.cream, fontSize: 15, lineHeight: 24, fontFamily: F.body }}>FAIRY CODE is the first astrology app to combine tropical and sidereal astrology into one unified experience called "Your Whole Story."</Text>
             <Text style={{ color: C.creamDim, fontSize: 14, lineHeight: 22, fontFamily: F.body, marginTop: 12 }}>Most apps show you one chart. We show you both — because you're more than just your Sun sign. The Surface reveals who the world sees. The Depths reveal who you really are. Together, they tell the complete truth.</Text>
           </OrnateFrame>
+          {/* Meet The Code Fairy */}
+          <GlassCard style={{ marginBottom: 12 }}>
+            <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontFamily: F.bodySemi, textTransform: 'uppercase', marginBottom: 14 }}>Meet The Code Fairy</Text>
+            <Text style={{ color: C.cream, fontSize: 15, lineHeight: 24, fontFamily: F.body, marginBottom: 12 }}>{"I'm Beca and I always thought we lived in some sort of simulation, but could never figure out the coding language."}</Text>
+            <Text style={{ color: C.creamDim, fontSize: 14, lineHeight: 22, fontFamily: F.body, marginBottom: 12 }}>{"While I was taking a full-stack developer course, I felt a nudge to look up my birth chart and that's when I realized: it's all code. The degrees, minutes, signs, aspects, and houses were just astrological code and astrology was the coding language to the simulation we inhabit."}</Text>
+            <Text style={{ color: C.creamDim, fontSize: 14, lineHeight: 22, fontFamily: F.body, marginBottom: 12 }}>{"I abandoned learning JavaScript to focus all my energy on astrology. I've read just about every astrological book on the market, meditated extensively, and created my own astrological coding language to interpret the stars."}</Text>
+            <Text style={{ color: C.creamDim, fontSize: 14, lineHeight: 22, fontFamily: F.body, marginBottom: 16 }}>{"I've read thousands of birth charts and each one reaffirms my belief: astrology is the ultimate blueprint for self-understanding."}</Text>
+            <View style={{ borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border, paddingTop: 14 }}>
+              <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontFamily: F.bodySemi, textTransform: 'uppercase', marginBottom: 10 }}>Understand Your Code</Text>
+              <Text style={{ color: C.cream, fontSize: 14, lineHeight: 23, fontFamily: F.displayItalic }}>{"You were born with a unique energetic blueprint and it's the code to your personal operating system. Your reality runs on this code and when you understand it, you gain the ability to consciously write your reality."}</Text>
+            </View>
+          </GlassCard>
+
           <GlassCard style={{ marginBottom: 12 }}>
             <Text style={{ color: C.gold, fontSize: 11, letterSpacing: 2, fontFamily: F.bodySemi, textTransform: 'uppercase', marginBottom: 12 }}>Built With</Text>
             {[['Chart Engine', 'Swiss Ephemeris via Kerykeion'], ['Zodiac Systems', 'Tropical + Sidereal (Lahiri)'], ['Data Source', 'Real-time planetary positions'], ['Design', 'DALL·E celestial art + custom SVG']].map(([l, v]) => (
