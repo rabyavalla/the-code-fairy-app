@@ -294,50 +294,63 @@ const HOUSE_LABELS = {
 };
 
 // Country list for picker
-// Country name → ISO code lookup (API requires 2-letter codes)
-const COUNTRY_CODES = {
-  'us': 'US', 'usa': 'US', 'united states': 'US', 'america': 'US',
-  'uk': 'GB', 'united kingdom': 'GB', 'england': 'GB', 'britain': 'GB', 'great britain': 'GB', 'scotland': 'GB', 'wales': 'GB',
-  'canada': 'CA', 'australia': 'AU', 'india': 'IN', 'germany': 'DE', 'deutschland': 'DE',
-  'france': 'FR', 'brazil': 'BR', 'brasil': 'BR', 'mexico': 'MX', 'méxico': 'MX',
-  'italy': 'IT', 'italia': 'IT', 'spain': 'ES', 'españa': 'ES', 'netherlands': 'NL', 'holland': 'NL',
-  'japan': 'JP', 'south korea': 'KR', 'korea': 'KR', 'china': 'CN', 'russia': 'RU',
-  'south africa': 'ZA', 'nigeria': 'NG', 'philippines': 'PH', 'colombia': 'CO',
-  'argentina': 'AR', 'sweden': 'SE', 'norway': 'NO', 'denmark': 'DK',
-  'ireland': 'IE', 'new zealand': 'NZ', 'portugal': 'PT', 'israel': 'IL',
-  'uae': 'AE', 'united arab emirates': 'AE', 'singapore': 'SG', 'thailand': 'TH',
-  'indonesia': 'ID', 'malaysia': 'MY', 'vietnam': 'VN', 'pakistan': 'PK',
-  'bangladesh': 'BD', 'sri lanka': 'LK', 'nepal': 'NP', 'turkey': 'TR', 'türkiye': 'TR',
-  'greece': 'GR', 'poland': 'PL', 'czech republic': 'CZ', 'czechia': 'CZ',
-  'austria': 'AT', 'switzerland': 'CH', 'belgium': 'BE', 'finland': 'FI',
-  'romania': 'RO', 'hungary': 'HU', 'ukraine': 'UA', 'egypt': 'EG',
-  'morocco': 'MA', 'kenya': 'KE', 'ghana': 'GH', 'ethiopia': 'ET',
-  'tanzania': 'TZ', 'uganda': 'UG', 'chile': 'CL', 'peru': 'PE',
-  'venezuela': 'VE', 'ecuador': 'EC', 'cuba': 'CU', 'jamaica': 'JM',
-  'puerto rico': 'PR', 'dominican republic': 'DO', 'costa rica': 'CR',
-  'panama': 'PA', 'guatemala': 'GT', 'honduras': 'HN', 'el salvador': 'SV',
-  'nicaragua': 'NI', 'bolivia': 'BO', 'paraguay': 'PY', 'uruguay': 'UY',
-  'trinidad': 'TT', 'trinidad and tobago': 'TT', 'bahamas': 'BS',
-  'iraq': 'IQ', 'iran': 'IR', 'saudi arabia': 'SA', 'qatar': 'QA',
-  'kuwait': 'KW', 'jordan': 'JO', 'lebanon': 'LB', 'syria': 'SY',
-  'afghanistan': 'AF', 'myanmar': 'MM', 'cambodia': 'KH', 'laos': 'LA',
-  'taiwan': 'TW', 'hong kong': 'HK', 'macau': 'MO', 'mongolia': 'MN',
-  'scotland': 'GB', 'northern ireland': 'GB',
-};
-function resolveCountryCode(input) {
-  if (!input) return 'US';
-  const trimmed = input.trim();
-  // Already a 2-letter code
-  if (trimmed.length === 2 && trimmed === trimmed.toUpperCase()) return trimmed;
-  const lower = trimmed.toLowerCase();
-  if (COUNTRY_CODES[lower]) return COUNTRY_CODES[lower];
-  // Fuzzy: check if input starts with any known country
-  for (const [name, code] of Object.entries(COUNTRY_CODES)) {
-    if (lower.startsWith(name) || name.startsWith(lower)) return code;
-  }
-  // Last resort — return as-is and hope the API can handle it
-  return trimmed;
-}
+// Country picker options (API requires 2-letter ISO codes)
+const COUNTRIES = [
+  { code: 'US', name: 'United States' }, { code: 'GB', name: 'United Kingdom' },
+  { code: 'CA', name: 'Canada' }, { code: 'AU', name: 'Australia' },
+  { code: 'IN', name: 'India' }, { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' }, { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' }, { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' }, { code: 'NL', name: 'Netherlands' },
+  { code: 'JP', name: 'Japan' }, { code: 'KR', name: 'South Korea' },
+  { code: 'CN', name: 'China' }, { code: 'RU', name: 'Russia' },
+  { code: 'ZA', name: 'South Africa' }, { code: 'NG', name: 'Nigeria' },
+  { code: 'PH', name: 'Philippines' }, { code: 'CO', name: 'Colombia' },
+  { code: 'AR', name: 'Argentina' }, { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' }, { code: 'DK', name: 'Denmark' },
+  { code: 'IE', name: 'Ireland' }, { code: 'NZ', name: 'New Zealand' },
+  { code: 'PT', name: 'Portugal' }, { code: 'IL', name: 'Israel' },
+  { code: 'AE', name: 'UAE' }, { code: 'SG', name: 'Singapore' },
+  { code: 'TH', name: 'Thailand' }, { code: 'ID', name: 'Indonesia' },
+  { code: 'MY', name: 'Malaysia' }, { code: 'VN', name: 'Vietnam' },
+  { code: 'PK', name: 'Pakistan' }, { code: 'BD', name: 'Bangladesh' },
+  { code: 'LK', name: 'Sri Lanka' }, { code: 'NP', name: 'Nepal' },
+  { code: 'TR', name: 'Turkey' }, { code: 'GR', name: 'Greece' },
+  { code: 'PL', name: 'Poland' }, { code: 'CZ', name: 'Czech Republic' },
+  { code: 'AT', name: 'Austria' }, { code: 'CH', name: 'Switzerland' },
+  { code: 'BE', name: 'Belgium' }, { code: 'FI', name: 'Finland' },
+  { code: 'RO', name: 'Romania' }, { code: 'HU', name: 'Hungary' },
+  { code: 'UA', name: 'Ukraine' }, { code: 'EG', name: 'Egypt' },
+  { code: 'MA', name: 'Morocco' }, { code: 'KE', name: 'Kenya' },
+  { code: 'GH', name: 'Ghana' }, { code: 'ET', name: 'Ethiopia' },
+  { code: 'TZ', name: 'Tanzania' }, { code: 'UG', name: 'Uganda' },
+  { code: 'CL', name: 'Chile' }, { code: 'PE', name: 'Peru' },
+  { code: 'VE', name: 'Venezuela' }, { code: 'EC', name: 'Ecuador' },
+  { code: 'CU', name: 'Cuba' }, { code: 'JM', name: 'Jamaica' },
+  { code: 'PR', name: 'Puerto Rico' }, { code: 'DO', name: 'Dominican Republic' },
+  { code: 'CR', name: 'Costa Rica' }, { code: 'PA', name: 'Panama' },
+  { code: 'GT', name: 'Guatemala' }, { code: 'HN', name: 'Honduras' },
+  { code: 'SV', name: 'El Salvador' }, { code: 'NI', name: 'Nicaragua' },
+  { code: 'BO', name: 'Bolivia' }, { code: 'PY', name: 'Paraguay' },
+  { code: 'UY', name: 'Uruguay' }, { code: 'TT', name: 'Trinidad & Tobago' },
+  { code: 'BS', name: 'Bahamas' }, { code: 'HT', name: 'Haiti' },
+  { code: 'IQ', name: 'Iraq' }, { code: 'IR', name: 'Iran' },
+  { code: 'SA', name: 'Saudi Arabia' }, { code: 'QA', name: 'Qatar' },
+  { code: 'KW', name: 'Kuwait' }, { code: 'JO', name: 'Jordan' },
+  { code: 'LB', name: 'Lebanon' }, { code: 'TW', name: 'Taiwan' },
+  { code: 'HK', name: 'Hong Kong' }, { code: 'MM', name: 'Myanmar' },
+  { code: 'KH', name: 'Cambodia' }, { code: 'SN', name: 'Senegal' },
+  { code: 'CM', name: 'Cameroon' }, { code: 'CI', name: 'Ivory Coast' },
+  { code: 'ZW', name: 'Zimbabwe' }, { code: 'ZM', name: 'Zambia' },
+  { code: 'MZ', name: 'Mozambique' }, { code: 'AO', name: 'Angola' },
+  { code: 'SD', name: 'Sudan' }, { code: 'LY', name: 'Libya' },
+  { code: 'TN', name: 'Tunisia' }, { code: 'DZ', name: 'Algeria' },
+  { code: 'AF', name: 'Afghanistan' }, { code: 'HR', name: 'Croatia' },
+  { code: 'RS', name: 'Serbia' }, { code: 'BG', name: 'Bulgaria' },
+  { code: 'SK', name: 'Slovakia' }, { code: 'LT', name: 'Lithuania' },
+  { code: 'LV', name: 'Latvia' }, { code: 'EE', name: 'Estonia' },
+  { code: 'SI', name: 'Slovenia' }, { code: 'IS', name: 'Iceland' },
+];
 
 function apiDataToPlanets(chartData) {
   if (!chartData || !chartData.tropical) return null;
@@ -820,7 +833,7 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
   const [step, setStep] = useState(1);
   const [month, setMonth] = useState(''); const [day, setDay] = useState(''); const [year, setYear] = useState('');
   const [hour, setHour] = useState(''); const [minute, setMinute] = useState(''); const [ampm, setAmpm] = useState('AM');
-  const [location, setLocation] = useState('');
+  const [city, setCity] = useState(''); const [country, setCountry] = useState('US'); const [customCountry, setCustomCountry] = useState('');
   const dayRef = useRef(null); const yearRef = useRef(null); const minRef = useRef(null);
 
   const handleMonth = (v) => { setMonth(v); if (v.length === 2) dayRef.current?.focus(); };
@@ -832,11 +845,8 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
   const handleSubmit = () => {
     let h = parseInt(hour) || 12; const m = parseInt(minute) || 0;
     if (ampm === 'PM' && h !== 12) h += 12; if (ampm === 'AM' && h === 12) h = 0;
-    const loc = location.trim() || 'New York';
-    const parts = loc.split(',').map(s => s.trim());
-    const cityName = parts[0];
-    const countryCode = resolveCountryCode(parts.length > 1 ? parts[parts.length - 1] : 'US');
-    onSaveBirthData({ name: 'User', year: parseInt(year) || 2000, month: parseInt(month) || 1, day: parseInt(day) || 1, hour: h, minute: m, city: cityName, country: countryCode });
+    const finalCountry = country === 'OTHER' ? (customCountry.trim().toUpperCase() || 'US') : country;
+    onSaveBirthData({ name: 'User', year: parseInt(year) || 2000, month: parseInt(month) || 1, day: parseInt(day) || 1, hour: h, minute: m, city: city.trim() || 'New York', country: finalCountry });
     onNavigate('compiling');
   };
 
@@ -874,9 +884,26 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
       )}
       {step === 3 && (
         <>
-          <Text style={st.label}>BIRTH LOCATION</Text>
-          <TextInput style={st.input} placeholder="e.g. Los Angeles, USA" placeholderTextColor={C.muted} value={location} onChangeText={setLocation} autoCapitalize="words" />
-          <Text style={{ color: C.muted, fontSize: 12, fontFamily: F.body, marginTop: 6, opacity: 0.7 }}>City, Country — or just the city name</Text>
+          <Text style={st.label}>CITY</Text>
+          <TextInput style={st.input} placeholder="e.g. Los Angeles" placeholderTextColor={C.muted} value={city} onChangeText={setCity} autoCapitalize="words" />
+          <Text style={[st.label, { marginTop: 16 }]}>COUNTRY</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 4 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'nowrap', gap: 8, paddingBottom: 8 }}>
+              {COUNTRIES.map(c => (
+                <TouchableOpacity key={c.code} onPress={() => { setCountry(c.code); setCustomCountry(''); }} style={[{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: C.border, backgroundColor: C.bgCard }, country === c.code && { backgroundColor: C.gold, borderColor: C.gold }]}>
+                  <Text style={[{ color: C.creamDim, fontSize: 12, fontFamily: F.bodyMed }, country === c.code && { color: C.bg }]}>{c.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity onPress={() => setCountry('OTHER')} style={[{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: C.border, backgroundColor: C.bgCard }, country === 'OTHER' && { backgroundColor: C.gold, borderColor: C.gold }]}>
+                <Text style={[{ color: C.creamDim, fontSize: 12, fontFamily: F.bodyMed }, country === 'OTHER' && { color: C.bg }]}>Other...</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+          {country === 'OTHER' && (
+            <View style={{ marginTop: 8 }}>
+              <TextInput style={st.input} placeholder="2-letter code (e.g. TZ, NG, JM)" placeholderTextColor={C.muted} value={customCountry} onChangeText={setCustomCountry} autoCapitalize="characters" maxLength={2} />
+            </View>
+          )}
         </>
       )}
 
@@ -1524,7 +1551,7 @@ function ProfileScreen({ onNavigate, birthData }) {
 
   const dd = birthData ? new Date(birthData.year, birthData.month - 1, birthData.day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not set';
   const dt = birthData ? `${birthData.hour > 12 ? birthData.hour - 12 : birthData.hour || 12}:${String(birthData.minute).padStart(2, '0')} ${birthData.hour >= 12 ? 'PM' : 'AM'}` : 'Not set';
-  const dp = birthData ? `${birthData.city}${birthData.country && birthData.country !== birthData.city ? ', ' + birthData.country : ''}` : 'Not set';
+  const dp = birthData ? `${birthData.city}, ${birthData.country}` : 'Not set';
 
   // ─── NOTIFICATIONS SETTINGS ───
   if (settingsView === 'notifications') {
