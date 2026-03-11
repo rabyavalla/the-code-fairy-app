@@ -104,11 +104,28 @@ function IconChiron({ size = 18, color = '#D4A574' }) {
   return <SvgIcon size={size}><Line x1="12" y1="4" x2="12" y2="20" stroke={color} strokeWidth="1.3" /><Circle cx="12" cy="16" r="4" stroke={color} strokeWidth="1.2" fill="none" /><Path d="M12 8L18 4" stroke={color} strokeWidth="1.3" /><Path d="M15 7.5L18 4" stroke={color} strokeWidth="1" /></SvgIcon>;
 }
 
+function IconSouthNode({ size = 18, color = '#D4A574' }) {
+  return <SvgIcon size={size}><Circle cx="12" cy="10" r="5" stroke={color} strokeWidth="1.3" fill="none" /><Line x1="12" y1="15" x2="12" y2="22" stroke={color} strokeWidth="1.3" /><Line x1="9" y1="19" x2="15" y2="19" stroke={color} strokeWidth="1" /></SvgIcon>;
+}
+function IconAscendant({ size = 18, color = '#D4A574' }) {
+  return <SvgIcon size={size}><Path d="M12 3L6 21H18L12 3Z" stroke={color} strokeWidth="1.3" fill="none" strokeLinejoin="round" /><Line x1="9" y1="14" x2="15" y2="14" stroke={color} strokeWidth="1" /></SvgIcon>;
+}
+function IconIC({ size = 18, color = '#D4A574' }) {
+  return <SvgIcon size={size}><Line x1="8" y1="4" x2="8" y2="20" stroke={color} strokeWidth="1.5" /><Path d="M14 4C17 4 19 7 19 12C19 17 17 20 14 20" stroke={color} strokeWidth="1.3" fill="none" /></SvgIcon>;
+}
+function IconDescendant({ size = 18, color = '#D4A574' }) {
+  return <SvgIcon size={size}><Path d="M6 4V20H12C16 20 19 16 19 12C19 8 16 4 12 4H6Z" stroke={color} strokeWidth="1.3" fill="none" strokeLinejoin="round" /></SvgIcon>;
+}
+function IconMidheaven({ size = 18, color = '#D4A574' }) {
+  return <SvgIcon size={size}><Path d="M3 20V4L8 16L12 4L16 16L21 4V20" stroke={color} strokeWidth="1.3" fill="none" strokeLinejoin="round" /></SvgIcon>;
+}
+
 // Map planet keys to icon components
 const PLANET_ICON_MAP = {
   sun: IconSun, moon: IconMoon, mercury: IconMercury, venus: IconVenus,
   mars: IconMars, jupiter: IconJupiter, saturn: IconSaturn, uranus: IconUranus,
-  neptune: IconNeptune, pluto: IconPluto, north_node: IconNorthNode, chiron: IconChiron,
+  neptune: IconNeptune, pluto: IconPluto, north_node: IconNorthNode, south_node: IconSouthNode,
+  chiron: IconChiron, ascendant: IconAscendant, ic: IconIC, descendant: IconDescendant, midheaven: IconMidheaven,
 };
 
 function PlanetIcon({ planet, size = 18, color = '#D4A574' }) {
@@ -216,8 +233,8 @@ async function fetchTransits() {
 // ═══════════════════════════════════════════════
 // DATA HELPERS & CONTENT
 // ═══════════════════════════════════════════════
-const PLANET_SYMBOLS = { sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇', north_node: '☊', chiron: '⚷' };
-const PLANET_NAMES = { sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars', jupiter: 'Jupiter', saturn: 'Saturn', uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto', north_node: 'North Node', chiron: 'Chiron' };
+const PLANET_SYMBOLS = { sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇', north_node: '☊', south_node: '☋', chiron: '⚷', ascendant: 'AC', ic: 'IC', descendant: 'DC', midheaven: 'MC' };
+const PLANET_NAMES = { sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars', jupiter: 'Jupiter', saturn: 'Saturn', uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto', north_node: 'North Node', south_node: 'South Node', chiron: 'Chiron', ascendant: 'Ascendant', ic: 'IC', descendant: 'Descendant', midheaven: 'Midheaven' };
 const ZODIAC_GLYPHS = { Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍', Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓' };
 
 const PLANET_MEANINGS = {
@@ -232,7 +249,12 @@ const PLANET_MEANINGS = {
   neptune: { short: 'Your dreams, illusions, and spirituality.', keywords: ['Dreams', 'Intuition', 'Creativity', 'Transcendence'] },
   pluto: { short: 'Deep transformation and hidden power.', keywords: ['Transformation', 'Power', 'Rebirth', 'Shadow'] },
   north_node: { short: 'Your soul\'s direction and growth path.', keywords: ['Destiny', 'Growth', 'Purpose', 'Evolution'] },
+  south_node: { short: 'Your past-life gifts and karmic comfort zone.', keywords: ['Past Lives', 'Karma', 'Gifts', 'Release'] },
   chiron: { short: 'Your deepest wound and greatest healing gift.', keywords: ['Healing', 'Wisdom', 'Vulnerability', 'Teaching'] },
+  ascendant: { short: 'Your rising sign — how the world first sees you.', keywords: ['First Impression', 'Appearance', 'Persona', 'Mask'] },
+  ic: { short: 'Your deepest roots — home, family, and inner foundation.', keywords: ['Home', 'Family', 'Roots', 'Inner World'] },
+  descendant: { short: 'What you seek in others and partnerships.', keywords: ['Partnerships', 'Relationships', 'Shadow Self', 'Attraction'] },
+  midheaven: { short: 'Your public image, career path, and legacy.', keywords: ['Career', 'Reputation', 'Legacy', 'Public Life'] },
 };
 
 // Sign-specific planet placement interpretations
@@ -249,6 +271,11 @@ const PLANET_IN_SIGN = {
   pluto: { Aries: 'You transform through radical independence. Death and rebirth cycles happen around identity, leadership, and the courage to begin again.', Taurus: 'You transform through values, money, and the material world. Your relationship with resources undergoes profound shifts.', Gemini: 'Transformation comes through information, communication, and how you think. Ideas have the power to completely remake your reality.', Cancer: 'Family, home, and emotional foundations undergo deep transformation. Your relationship with belonging is being fundamentally rewritten.', Leo: 'Your creative identity and self-expression undergo profound transformation. Who you think you are dies and is reborn.', Virgo: 'Your approach to work, health, and service gets completely dismantled and rebuilt. Perfectionism transforms into genuine mastery.', Libra: 'Relationships are your transformation ground. Partnerships die, evolve, or completely shift your understanding of love and equality.', Scorpio: 'Pluto is at home here. Transformation is your constant. You die and are reborn many times — each version of you more powerful than the last.', Sagittarius: 'Your beliefs, worldview, and understanding of truth undergo total transformation. What you thought was true gets demolished and rebuilt.', Capricorn: 'Career, ambition, and your relationship with power undergo radical transformation. Old structures fall so new ones can be built.', Aquarius: 'Community, technology, and your vision for the future undergo deep transformation. The systems you believed in get fundamentally reshaped.', Pisces: 'Spirituality, creativity, and your connection to the collective unconscious undergo profound transformation. Old spiritual frameworks dissolve.' },
   north_node: { Aries: 'Your soul is learning to lead, act independently, and put yourself first — after lifetimes of compromising for others.', Taurus: 'Your soul is learning to build stability, trust the physical world, and find peace — after lifetimes of intensity and crisis.', Gemini: 'Your soul is learning to be curious, communicative, and adaptable — after lifetimes of rigid belief systems.', Cancer: 'Your soul is learning vulnerability, emotional connection, and nurturing — after lifetimes of stoic self-reliance.', Leo: 'Your soul is learning to shine, create, and take center stage — after lifetimes of hiding in the group.', Virgo: 'Your soul is learning discernment, practical service, and attention to detail — after lifetimes of escapism and idealism.', Libra: 'Your soul is learning partnership, diplomacy, and seeing the other — after lifetimes of going it alone.', Scorpio: 'Your soul is learning to go deep, merge with others, and embrace transformation — after lifetimes of comfort-seeking.', Sagittarius: 'Your soul is learning to seek higher truth, explore, and find meaning — after lifetimes of surface-level information.', Capricorn: 'Your soul is learning discipline, authority, and long-term building — after lifetimes of emotional dependency.', Aquarius: 'Your soul is learning to serve the collective, innovate, and detach — after lifetimes of personal drama and ego.', Pisces: 'Your soul is learning to surrender, trust the universe, and dissolve ego — after lifetimes of over-control and analysis.' },
   chiron: { Aries: 'Your deepest wound is around your right to exist and assert yourself. Your healing gift: teaching others to be brave.', Taurus: 'Your deepest wound is around self-worth and material security. Your healing gift: showing others their inherent value.', Gemini: 'Your deepest wound is around your voice and intelligence. Your healing gift: helping others find their words.', Cancer: 'Your deepest wound is around belonging and emotional safety. Your healing gift: creating home for the homeless hearts.', Leo: 'Your deepest wound is around being seen and valued. Your healing gift: helping others shine without shame.', Virgo: 'Your deepest wound is around being "enough." Your healing gift: showing others that imperfection is human, not failure.', Libra: 'Your deepest wound is around relationships and rejection. Your healing gift: teaching others about healthy love and partnership.', Scorpio: 'Your deepest wound is around trust, power, and betrayal. Your healing gift: guiding others through their darkest transformations.', Sagittarius: 'Your deepest wound is around meaning and belief. Your healing gift: helping others find their own truth.', Capricorn: 'Your deepest wound is around achievement and recognition. Your healing gift: showing others that worth isn\'t measured by status.', Aquarius: 'Your deepest wound is around belonging and being different. Your healing gift: showing others that their uniqueness is their power.', Pisces: 'Your deepest wound is around spiritual disconnection or overwhelm. Your healing gift: holding space for others\' pain and transcendence.' },
+  south_node: { Aries: 'You carry lifetimes of fierce independence. The comfort zone is going solo — your growth edge is learning to partner.', Taurus: 'You carry lifetimes of material mastery. The comfort zone is stability — your growth edge is embracing transformation.', Gemini: 'You carry lifetimes of intellectual agility. The comfort zone is information — your growth edge is committed belief.', Cancer: 'You carry lifetimes of emotional caretaking. The comfort zone is nurturing — your growth edge is self-reliance.', Leo: 'You carry lifetimes of creative spotlight. The comfort zone is personal drama — your growth edge is serving the collective.', Virgo: 'You carry lifetimes of perfectionism and service. The comfort zone is analysis — your growth edge is surrendering to faith.', Libra: 'You carry lifetimes of people-pleasing. The comfort zone is harmony — your growth edge is standing alone.', Scorpio: 'You carry lifetimes of intensity and control. The comfort zone is power dynamics — your growth edge is simplicity and peace.', Sagittarius: 'You carry lifetimes of philosophical wandering. The comfort zone is big-picture thinking — your growth edge is listening and learning.', Capricorn: 'You carry lifetimes of authority and structure. The comfort zone is achievement — your growth edge is emotional vulnerability.', Aquarius: 'You carry lifetimes of detachment and idealism. The comfort zone is the collective — your growth edge is personal heart and creativity.', Pisces: 'You carry lifetimes of spiritual dissolution. The comfort zone is escapism — your growth edge is practical, grounded service.' },
+  ascendant: { Aries: 'The world meets you as a force of nature — bold, direct, and impossible to ignore. Your first impression is one of action and courage.', Taurus: 'The world meets you as grounded and beautiful. You radiate calm, sensuality, and reliability. People feel safe around you immediately.', Gemini: 'The world meets you as curious and quick. You light up rooms with conversation, wit, and an energy that keeps people guessing.', Cancer: 'The world meets you as warm and emotionally intuitive. People feel nurtured in your presence. Your softness is your armor.', Leo: 'The world meets you as radiant and commanding. You walk into a room and people notice. Warmth, confidence, and drama define your entrance.', Virgo: 'The world meets you as put-together and observant. You come across as intelligent, helpful, and quietly in control of everything.', Libra: 'The world meets you as charming and graceful. Beauty, diplomacy, and social ease define how others first experience you.', Scorpio: 'The world meets you as intense and magnetic. Your presence is felt before you speak. Mystery and power radiate from you.', Sagittarius: 'The world meets you as adventurous and optimistic. You come across as open, enthusiastic, and bigger than life.', Capricorn: 'The world meets you as serious and capable. You project authority, ambition, and quiet confidence that commands respect.', Aquarius: 'The world meets you as unique and unconventional. You come across as independent, forward-thinking, and refreshingly different.', Pisces: 'The world meets you as dreamy and ethereal. You project gentleness, creativity, and a spiritual quality that draws people in.' },
+  midheaven: { Aries: 'Your career path demands independence and leadership. You are meant to pioneer, start things, and lead from the front.', Taurus: 'Your career path is built on beauty, stability, and tangible results. You are meant to create lasting, valuable things.', Gemini: 'Your career path runs on communication and ideas. You are meant to write, teach, connect, and keep information flowing.', Cancer: 'Your career path is rooted in nurturing and emotional intelligence. You are meant to care for, feed, or heal others publicly.', Leo: 'Your career path demands creative self-expression and visibility. You are meant to perform, lead, and be seen.', Virgo: 'Your career path is built on precision, service, and mastery. You are meant to solve problems and perfect systems.', Libra: 'Your career path flows through partnerships, beauty, and justice. You are meant to create harmony and advocate for balance.', Scorpio: 'Your career path involves transformation, research, and power. You are meant to uncover hidden truths and facilitate deep change.', Sagittarius: 'Your career path is fueled by meaning, travel, and big ideas. You are meant to teach, explore, and expand horizons.', Capricorn: 'Your career path demands structure, discipline, and legacy building. You are meant to rise to the top through sustained effort.', Aquarius: 'Your career path runs on innovation and humanitarian vision. You are meant to disrupt systems and build the future.', Pisces: 'Your career path flows through creativity, healing, and spiritual service. You are meant to channel something transcendent into the world.' },
+  ic: { Aries: 'Your deepest roots carry the energy of independence and self-reliance. Home was a place where you learned to fight for yourself.', Taurus: 'Your deepest roots carry stability, comfort, and sensory beauty. Home was a place of groundedness and material security.', Gemini: 'Your deepest roots carry curiosity and mental stimulation. Home was a place of conversation, learning, and restless energy.', Cancer: 'Your deepest roots carry deep emotional bonds and nurturing. Home was (or needed to be) a sanctuary of safety and love.', Leo: 'Your deepest roots carry warmth, creativity, and pride. Home was a place of self-expression and heart-centered connection.', Virgo: 'Your deepest roots carry order, service, and perfectionism. Home was a place of routine, helpfulness, and high standards.', Libra: 'Your deepest roots carry harmony and partnership. Home was a place focused on relationships, beauty, and keeping the peace.', Scorpio: 'Your deepest roots carry intensity and hidden emotional currents. Home was a place of deep bonds, secrets, and transformation.', Sagittarius: 'Your deepest roots carry freedom and philosophical seeking. Home was a place of adventure, learning, or multicultural influence.', Capricorn: 'Your deepest roots carry discipline and responsibility. Home was a place of structure, expectation, and early maturity.', Aquarius: 'Your deepest roots carry independence and unconventionality. Home was a place that was different from the norm in some meaningful way.', Pisces: 'Your deepest roots carry spiritual sensitivity and emotional permeability. Home was a place of imagination, empathy, or boundarylessness.' },
+  descendant: { Aries: 'You attract and need bold, independent partners. The qualities you seek in others: courage, directness, and fire.', Taurus: 'You attract and need steady, sensual partners. The qualities you seek in others: reliability, beauty, and grounded presence.', Gemini: 'You attract and need intellectually stimulating partners. The qualities you seek: wit, curiosity, and mental agility.', Cancer: 'You attract and need emotionally nurturing partners. The qualities you seek: tenderness, loyalty, and deep emotional safety.', Leo: 'You attract and need warm, expressive partners. The qualities you seek: generosity, confidence, and heartfelt passion.', Virgo: 'You attract and need thoughtful, grounded partners. The qualities you seek: intelligence, helpfulness, and quiet devotion.', Libra: 'You attract and need harmonious, beautiful partners. The qualities you seek: grace, diplomacy, and partnership equality.', Scorpio: 'You attract and need intense, transformative partners. The qualities you seek: depth, honesty, and emotional fearlessness.', Sagittarius: 'You attract and need adventurous, philosophical partners. The qualities you seek: freedom, humor, and big-picture thinking.', Capricorn: 'You attract and need ambitious, reliable partners. The qualities you seek: discipline, maturity, and long-term commitment.', Aquarius: 'You attract and need unconventional, independent partners. The qualities you seek: originality, intellectual freedom, and vision.', Pisces: 'You attract and need spiritual, creative partners. The qualities you seek: empathy, imagination, and soul-level connection.' },
 };
 
 // Get sign-specific interpretation for a planet placement
@@ -354,7 +381,7 @@ const COUNTRIES = [
 
 function apiDataToPlanets(chartData) {
   if (!chartData || !chartData.tropical) return null;
-  const order = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','north_node','chiron'];
+  const order = ['sun','moon','ascendant','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','north_node','south_node','chiron','midheaven','ic','descendant'];
   return order.map(key => {
     const trop = chartData.tropical[key];
     const sid = chartData.sidereal ? chartData.sidereal[key] : null;
@@ -645,18 +672,29 @@ function ConstellationChart({ planets, view }) {
 // ═══════════════════════════════════════════════
 // FALLBACK DATA
 // ═══════════════════════════════════════════════
-const FALLBACK_PLANETS = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','north_node','chiron'].map(k => ({
+const FALLBACK_PLANETS = ['sun','moon','ascendant','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto','north_node','south_node','chiron','midheaven','ic','descendant'].map(k => ({
   key: k, name: PLANET_NAMES[k], symbol: PLANET_SYMBOLS[k],
   tropical: k === 'sun' ? 'Aries 15°' : k === 'moon' ? 'Cancer 22°' : 'Pisces 3°',
   sidereal: k === 'sun' ? 'Pisces 21°' : k === 'moon' ? 'Gemini 28°' : 'Aquarius 9°',
   meaning: PLANET_MEANINGS[k] || { short: '', keywords: [] },
 }));
 
-const DAILY_READINGS = {
-  surface: "The simulation served up something interesting today. Mercury is running a sparkly new update in your communication code — things might get a little spicy. Your words have extra magic right now. Use them wisely, and maybe don't send that text at 2am.",
-  depths: "Your deeper patterns are shifting today. The sidereal sky shows a quiet but powerful rearrangement in your emotional code. The Moon is whispering to Neptune — your intuition is running at full capacity. Trust what you feel, even if you can't explain it yet.",
-  wholeStory: "Here's the full picture: what the world sees is Mercury giving your Surface a communication upgrade — you're sharper, wittier, more magnetic. But underneath, your Depths show the Moon whispering to Neptune, softening everything with intuition. You can be both brilliant AND gentle today.",
-};
+// Generate dynamic daily reading from live transits
+function getDailyReading(transits, view) {
+  if (!transits || transits.length === 0) return 'The stars are aligning for you today. Pull down to refresh and see what the cosmos has to say.';
+  const sun = transits.find(t => t.key === 'sun');
+  const moon = transits.find(t => t.key === 'moon');
+  const mercury = transits.find(t => t.key === 'mercury');
+  const venus = transits.find(t => t.key === 'venus');
+  const mars = transits.find(t => t.key === 'mars');
+  const parts = [];
+  if (sun) parts.push(`The Sun is moving through ${sun.sign}, lighting up themes of ${sun.element?.toLowerCase() || 'cosmic'} energy in the collective.`);
+  if (moon) parts.push(`The Moon is in ${moon.sign} today — ${moon.element === 'Fire' ? 'emotions run hot and action-oriented' : moon.element === 'Water' ? 'feelings run deep and intuition is strong' : moon.element === 'Air' ? 'the mood is social and mentally active' : 'the energy is grounded and steady'}.`);
+  if (mercury) parts.push(`Mercury in ${mercury.sign} shapes how we think and communicate right now${mercury.retrograde ? ' — and yes, Mercury is retrograde, so double-check everything' : ''}.`);
+  if (venus) parts.push(`Venus in ${venus.sign} colors what we desire and how we connect.`);
+  if (mars) parts.push(`Mars in ${mars.sign} drives the collective energy and ambition${mars.retrograde ? ' (retrograde — old frustrations may resurface)' : ''}.`);
+  return parts.join(' ');
+}
 
 const COURSES = [
   { id: 'surface-depths', title: 'The Surface & The Depths', desc: 'Understand your two charts and why both matter', tag: 'Foundations', duration: '25 min',
@@ -838,9 +876,9 @@ function OnboardingScreen({ onNavigate, onSaveBirthData }) {
 
   const handleMonth = (v) => { setMonth(v); if (v.length === 2) dayRef.current?.focus(); };
   const handleDay = (v) => { setDay(v); if (v.length === 2) yearRef.current?.focus(); };
-  const handleYear = (v) => { setYear(v); if (v.length === 4) setTimeout(() => setStep(2), 300); };
+  const handleYear = (v) => { setYear(v); };
   const handleHour = (v) => { setHour(v); if (v.length === 2) minRef.current?.focus(); };
-  const handleMinute = (v) => { setMinute(v); if (v.length === 2) setTimeout(() => setStep(3), 300); };
+  const handleMinute = (v) => { setMinute(v); };
 
   const handleSubmit = () => {
     let h = parseInt(hour) || 12; const m = parseInt(minute) || 0;
@@ -954,7 +992,7 @@ function DailyReadingScreen({ planets }) {
   const [refreshing, setRefreshing] = useState(false);
   const [liveTransits, setLiveTransits] = useState(null);
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const reading = view === 'The Surface' ? DAILY_READINGS.surface : view === 'The Depths' ? DAILY_READINGS.depths : DAILY_READINGS.wholeStory;
+  const reading = getDailyReading(liveTransits, view);
 
   // Get user's sun sign for personalized imagery
   const sunPlanet = planets ? planets.find(p => p.key === 'sun') : null;
@@ -963,7 +1001,17 @@ function DailyReadingScreen({ planets }) {
   const displaySign = view === 'The Surface' ? tropicalSign : view === 'The Depths' ? siderealSign : tropicalSign;
   const signImage = SIGN_IMAGES[displaySign] || SIGN_IMAGES.Leo;
 
-  useEffect(() => { fetchTransits().then(d => { if (d) { const p = apiTransitsToDisplay(d); if (p) setLiveTransits(p); } }); }, []);
+  const [lastFetchDate, setLastFetchDate] = useState('');
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const doFetch = () => {
+      fetchTransits().then(d => { if (d) { const p = apiTransitsToDisplay(d); if (p) setLiveTransits(p); } setLastFetchDate(today); });
+    };
+    doFetch();
+    // Check every 5 minutes if the day has changed
+    const interval = setInterval(() => { const now = new Date().toDateString(); if (now !== today) doFetch(); }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
   const handleRefresh = async () => { setRefreshing(true); const d = await fetchTransits(); if (d) { const p = apiTransitsToDisplay(d); if (p) setLiveTransits(p); } setRefreshing(false); };
 
   return (
